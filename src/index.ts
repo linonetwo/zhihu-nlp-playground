@@ -1,4 +1,18 @@
-import './solidAuth'
+import { getSoLiDSession } from './solidAuth';
+
+function putFile(content: string, session: any) {}
+
+(async function main() {
+  const session = await getSoLiDSession();
+  const publicFolder = session.webId.replace('profile/card#me', 'public')
+  console.log(`${publicFolder}/zhihu/aa.txt`);
+  
+  await session.fetch(`${publicFolder}/zhihu/aa.txt`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'text' },
+    body: 'asdf',
+  })
+})();
 
 const QUESTIONS_INFO_URL =
   'https://www.zhihu.com/api/v4/questions/{}?include=data[*].answer_count,follower_count,content,detail';
