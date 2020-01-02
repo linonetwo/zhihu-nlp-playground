@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "run": "npm run build && MKCERT_PATH=\"$(mkcert -CAROOT)/rootCA.pem\" node ./dist/index.js",
-    "baas-start": "mkdir -p ./solid && cd ./solid && solid start --port 8443 --ssl-key ../keys/localhost-key.pem --ssl-cert ../keys/localhost.pem --webid --multiuser --data-browser-path $(pwd)/../node_modules/mashlib/dist/databrowser.html",
-    "generate-keys": "mkdir -p ./keys && cd ./keys && mkcert localhost",
+    "baas-start": "mkdir -p ./solid && cd ./solid && solid start --port 8443 --ssl-key ../keys/localhost+2-key.pem --ssl-cert ../keys/localhost+2.pem --webid --multiuser --data-browser-path $(pwd)/../node_modules/mashlib/dist/databrowser.html",
+    "generate-keys": "mkdir -p ./keys && cd ./keys && mkcert localhost zhihucrawler.localhost 127.0.0.1",
     "type-check": "tsc --noEmit",
     "type-check:watch": "npm run type-check -- --watch",
     "build": "npm run build:types && npm run build:js",
