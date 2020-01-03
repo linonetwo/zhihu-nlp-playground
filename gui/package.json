@@ -1,0 +1,69 @@
+{
+  "name": "@linonetwo012/zhihu-nlp-playground",
+  "version": "1.0.0",
+  "description": "Do some annotation on zhihu dataset.",
+  "main": "index.js",
+  "scripts": {
+    "start": "rescripts start"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "rescripts": [
+    [
+      "use-babel-config",
+      ".babelrc.js"
+    ],
+    "disable-eslint"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/linonetwo/zhihu-nlp-playground.git"
+  },
+  "keywords": [
+    "crawler",
+    "zhihu",
+    "nlp"
+  ],
+  "author": "linonetwo",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/linonetwo/zhihu-nlp-playground/issues"
+  },
+  "homepage": "https://github.com/linonetwo/zhihu-nlp-playground#readme",
+  "dependencies": {
+    "@types/react": "^16.9.17",
+    "@types/react-dom": "^16.9.4",
+    "@types/react-redux": "^7.1.5",
+    "@types/react-router": "^5.1.3",
+    "@types/styled-components": "^4.4.1",
+    "history": "^4.10.1",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "react-redux": "^7.1.3",
+    "react-router": "^5.1.2",
+    "redux": "^4.0.5",
+    "styled-components": "^4.4.1",
+    "styled-normalize": "^8.0.6"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.7",
+    "@babel/core": "^7.7.7",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/plugin-proposal-numeric-separator": "^7.7.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.7.7",
+    "@babel/plugin-transform-runtime": "^7.7.6",
+    "@babel/polyfill": "^7.7.0",
+    "@babel/preset-env": "^7.7.7",
+    "@babel/preset-typescript": "^7.7.7",
+    "@babel/runtime": "^7.7.7",
+    "@rescripts/cli": "0.0.13",
+    "@rescripts/rescript-env": "0.0.11",
+    "react-scripts": "^3.3.0",
+    "rescript-disable-eslint": "^1.0.1",
+    "typescript": "^3.7.4"
+  }
+}
