@@ -30,7 +30,7 @@ async function crawling() {
         await db('failures').insert(answer);
         continue;
       }
-      saveAnswerToDB(answer, db);
+      saveAnswerToDB(id, answer, db);
     }
 
     await db('questions')
@@ -78,7 +78,7 @@ interface ICrawlFailure {
   time: number;
 }
 async function* getAnswersNewerThanTime(
-  questionID: string,
+  questionID: number,
   crawledTime: number,
   previousOffset: number = 0
 ): AsyncGenerator<IAnswerData | ICrawlFailure, void, unknown> {
@@ -120,7 +120,7 @@ async function* getAnswersNewerThanTime(
   }
 }
 
-async function saveAnswerToDB(answer: IAnswerData, db: knex<any, unknown[]>) {
+async function saveAnswerToDB(questionID: number, answer: IAnswerData, db: knex<any, unknown[]>) {
   // 格式化爬取的数据，方便存入数据库
   const {
     id: answerID,
@@ -184,7 +184,7 @@ async function saveAnswerToDB(answer: IAnswerData, db: knex<any, unknown[]>) {
     }
   } catch (error) {
     await db('failures').insert({
-      url: `https://www.zhihu.com/question/${id}/answer/${answerID}`,
+      url: `https://www.zhihu.com/question/${questionID}/answer/${answerID}`,
       error: String(error),
       time: getCurrentTime(),
     });
@@ -200,14 +200,14 @@ async function resumeFailure() {
     useNullAsDefault: true,
   });
 
-  const questionID = '275359100';
+  const questionID = 275359100;
   for await (const answer of getAnswersNewerThanTime(questionID, 0, 7340)) {
     // 先检查有没有出错
     if ('error' in answer) {
       await db('failures').insert(answer);
       continue;
     }
-    saveAnswerToDB(answer, db);
+    saveAnswerToDB(questionID, answer, db);
   }
 
   await db('questions')
