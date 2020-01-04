@@ -4,7 +4,7 @@
   "description": "Do some annotation on zhihu dataset.",
   "main": "index.js",
   "scripts": {
-    "run:qa": "npm run build && DEBUG=knex:tx node ./dist/questionsAnswersCrawler/index.js",
+    "run:qa": "npm run build && node ./dist/questionsAnswersCrawler/index.js",
     "db:qa:create": "npm run build && node ./dist/questionsAnswersCrawler/scripts/createDB.js",
     "db:qa:addTask": "npm run build && node ./dist/questionsAnswersCrawler/scripts/addTasks.js",
     "type-check": "tsc --noEmit",
