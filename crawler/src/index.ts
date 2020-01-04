@@ -1,9 +1,12 @@
-import fetch from 'node-fetch';
+import nodeFetch from 'node-fetch';
+import fetchRetry from '@zeit/fetch-retry'
 import knex from 'knex';
 import path from 'path';
 import Promise from 'bluebird';
 
 import { parseGenderFromZhihuGenderID, getCurrentTime } from './utils';
+
+const fetch = fetchRetry(nodeFetch);
 
 async function crawling() {
   const db = knex({
@@ -27,75 +30,7 @@ async function crawling() {
         await db('failures').insert(answer);
         continue;
       }
-      // 格式化爬取的数据，方便存入数据库
-      const {
-        id: answerID,
-        content,
-        author: { gender: genderFlag, headline, name: nickname, url_token: username },
-        created_time: createdTime,
-        updated_time: updatedTime,
-        comment_count: commentCount,
-        voteup_count: voteUpCount,
-      } = answer;
-      const gender = parseGenderFromZhihuGenderID(genderFlag, username);
-      // 如果没有爬取过这个用户，就在数据库里记录一下这个用户的基本信息，匿名用户直接用 1，已经预存在数据库里了
-      let authorIDinDB: number = 1;
-      if (username !== '') {
-        let userIDResult: { id: number } | undefined = await db('users')
-          .where({
-            username,
-          })
-          .first('id');
-        if (!userIDResult) {
-          authorIDinDB = (
-            await db('users').insert({
-              gender,
-              headline,
-              nickname,
-              username,
-            })
-          )[0];
-        } else {
-          authorIDinDB = userIDResult.id;
-        }
-      }
-
-      // 把回答存入数据库
-      try {
-        const existedAnswer: { updatedTime: number } | undefined = await db('answers')
-          .where({ id: answerID })
-          .first('updatedTime');
-        // 如果这个问题之前爬过了
-        if (existedAnswer !== undefined) {
-          await db('answers')
-            .where({ id: answerID })
-            .update({
-              content,
-              updatedTime,
-              crawledTime: getCurrentTime(),
-              commentCount,
-              voteUpCount,
-            });
-        } else {
-          await db('answers').insert({
-            id: answerID,
-            user: authorIDinDB,
-            content,
-            createdTime,
-            updatedTime,
-            crawledTime: getCurrentTime(),
-            commentCount,
-            voteUpCount,
-          });
-        }
-      } catch (error) {
-        await db('failures').insert({
-          url: `https://www.zhihu.com/question/${id}/answer/${answerID}`,
-          error: String(error),
-          time: getCurrentTime(),
-        });
-        continue;
-      }
+      saveAnswerToDB(answer, db);
     }
 
     await db('questions')
@@ -144,11 +79,12 @@ interface ICrawlFailure {
 }
 async function* getAnswersNewerThanTime(
   questionID: string,
-  crawledTime: number
+  crawledTime: number,
+  previousOffset: number = 0
 ): AsyncGenerator<IAnswerData | ICrawlFailure, void, unknown> {
   const batchSize = 20;
   let hasNewContent = true;
-  let currentOffset = 0;
+  let currentOffset = previousOffset;
   while (hasNewContent) {
     // 如果接下来没有置为 true，则爬完这一页就不爬了
     hasNewContent = false;
@@ -184,4 +120,102 @@ async function* getAnswersNewerThanTime(
   }
 }
 
-crawling();
+async function saveAnswerToDB(answer: IAnswerData, db: knex<any, unknown[]>) {
+  // 格式化爬取的数据，方便存入数据库
+  const {
+    id: answerID,
+    content,
+    author: { gender: genderFlag, headline, name: nickname, url_token: username },
+    created_time: createdTime,
+    updated_time: updatedTime,
+    comment_count: commentCount,
+    voteup_count: voteUpCount,
+  } = answer;
+  const gender = parseGenderFromZhihuGenderID(genderFlag, username);
+  // 如果没有爬取过这个用户，就在数据库里记录一下这个用户的基本信息，匿名用户直接用 1，已经预存在数据库里了
+  let authorIDinDB: number = 1;
+  if (username !== '') {
+    let userIDResult: { id: number } | undefined = await db('users')
+      .where({
+        username,
+      })
+      .first('id');
+    if (!userIDResult) {
+      authorIDinDB = (
+        await db('users').insert({
+          gender,
+          headline,
+          nickname,
+          username,
+        })
+      )[0];
+    } else {
+      authorIDinDB = userIDResult.id;
+    }
+  }
+
+  // 把回答存入数据库
+  try {
+    const existedAnswer: { updatedTime: number } | undefined = await db('answers')
+      .where({ id: answerID })
+      .first('updatedTime');
+    // 如果这个问题之前爬过了
+    if (existedAnswer !== undefined) {
+      await db('answers')
+        .where({ id: answerID })
+        .update({
+          content,
+          updatedTime,
+          crawledTime: getCurrentTime(),
+          commentCount,
+          voteUpCount,
+        });
+    } else {
+      await db('answers').insert({
+        id: answerID,
+        user: authorIDinDB,
+        content,
+        createdTime,
+        updatedTime,
+        crawledTime: getCurrentTime(),
+        commentCount,
+        voteUpCount,
+      });
+    }
+  } catch (error) {
+    await db('failures').insert({
+      url: `https://www.zhihu.com/question/${id}/answer/${answerID}`,
+      error: String(error),
+      time: getCurrentTime(),
+    });
+  }
+}
+
+async function resumeFailure() {
+  const db = knex({
+    client: 'sqlite3',
+    connection: {
+      filename: path.join(__dirname, '../../data/data.sqlite'),
+    },
+    useNullAsDefault: true,
+  });
+
+  const questionID = '275359100';
+  for await (const answer of getAnswersNewerThanTime(questionID, 0, 7340)) {
+    // 先检查有没有出错
+    if ('error' in answer) {
+      await db('failures').insert(answer);
+      continue;
+    }
+    saveAnswerToDB(answer, db);
+  }
+
+  await db('questions')
+    .where({ id: questionID })
+    .update({ crawledTime: getCurrentTime() });
+
+  await db.destroy();
+}
+
+// crawling();
+resumeFailure();
