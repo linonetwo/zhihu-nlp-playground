@@ -15,13 +15,13 @@ async function crawling() {
   });
 
   const questions = await db
-    .column('id', 'updatedTime')
+    .column('id', 'crawledTime')
     .select()
     .from('questions');
 
   for (const question of questions) {
-    const { id, updatedTime } = question;
-    for await (const answer of getAnswersNewerThanTime(id, updatedTime)) {
+    const { id, crawledTime } = question;
+    for await (const answer of getAnswersNewerThanTime(id, crawledTime)) {
       // 先检查有没有出错
       if ('error' in answer) {
         await db('failures').insert(answer);
@@ -38,8 +38,6 @@ async function crawling() {
         voteup_count: voteUpCount,
       } = answer;
       const gender = parseGenderFromZhihuGenderID(genderFlag, username);
-      const crawledTime = getCurrentTime();
-
       // 如果没有爬取过这个用户，就在数据库里记录一下这个用户的基本信息，匿名用户直接用 1，已经预存在数据库里了
       let authorIDinDB: number = 1;
       if (username !== '') {
@@ -50,13 +48,12 @@ async function crawling() {
           .first('id');
         if (!userIDResult) {
           authorIDinDB = (
-            await db('users')
-              .insert({
-                gender,
-                headline,
-                nickname,
-                username,
-              })
+            await db('users').insert({
+              gender,
+              headline,
+              nickname,
+              username,
+            })
           )[0];
         } else {
           authorIDinDB = userIDResult.id;
@@ -65,16 +62,32 @@ async function crawling() {
 
       // 把回答存入数据库
       try {
-        await db('answers').insert({
-          id: answerID,
-          user: authorIDinDB,
-          content,
-          createdTime,
-          updatedTime,
-          crawledTime,
-          commentCount,
-          voteUpCount,
-        });
+        const existedAnswer: { updatedTime: number } | undefined = await db('answers')
+          .where({ id: answerID })
+          .first('updatedTime');
+        // 如果这个问题之前爬过了
+        if (existedAnswer !== undefined) {
+          await db('answers')
+            .where({ id: answerID })
+            .update({
+              content,
+              updatedTime,
+              crawledTime: getCurrentTime(),
+              commentCount,
+              voteUpCount,
+            });
+        } else {
+          await db('answers').insert({
+            id: answerID,
+            user: authorIDinDB,
+            content,
+            createdTime,
+            updatedTime,
+            crawledTime: getCurrentTime(),
+            commentCount,
+            voteUpCount,
+          });
+        }
       } catch (error) {
         await db('failures').insert({
           url: `https://www.zhihu.com/question/${id}/answer/${answerID}`,

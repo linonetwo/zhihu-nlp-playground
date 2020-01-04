@@ -112,3 +112,4 @@ db
 solid
 keys
 gun
+data/*.sqlite
