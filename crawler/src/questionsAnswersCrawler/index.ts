@@ -28,24 +28,4 @@ async function crawling() {
   await db.destroy();
 }
 
-async function resumeFailure() {
-  const { trx, db } = await getTransaction();
-  const questionID = 275359100;
-  for await (const answer of getAnswersNewerThanTime(questionID, 0, 30360)) {
-    // 先检查有没有出错
-    if ('error' in answer) {
-      await trx('failures').insert(answer);
-    } else {
-      await saveAnswerToDB(questionID, answer, trx);
-    }
-  }
-
-  await trx('questions')
-    .where({ id: questionID })
-    .update({ crawledTime: getCurrentTime() });
-  await trx.commit();
-  await db.destroy();
-}
-
-// crawling();
-resumeFailure();
+crawling();
