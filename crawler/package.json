@@ -4,9 +4,9 @@
   "description": "Do some annotation on zhihu dataset.",
   "main": "index.js",
   "scripts": {
-    "run": "npm run build && node ./dist/index.js",
-    "db:create": "npm run build && node ./dist/scripts/createDB.js",
-    "db:addTask": "npm run build && node ./dist/scripts/addTasks.js",
+    "run:qa": "npm run build && DEBUG=knex:tx node ./dist/questionsAnswersCrawler/index.js",
+    "db:qa:create": "npm run build && node ./dist/questionsAnswersCrawler/scripts/createDB.js",
+    "db:qa:addTask": "npm run build && node ./dist/questionsAnswersCrawler/scripts/addTasks.js",
     "type-check": "tsc --noEmit",
     "type-check:watch": "npm run type-check -- --watch",
     "build": "npm run build:types && npm run build:js",
