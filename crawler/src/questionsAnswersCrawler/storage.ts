@@ -8,7 +8,7 @@ export async function getTransaction() {
   const db = knex({
     client: 'sqlite3',
     connection: {
-      filename: path.join(__dirname, '../../../data/data.sqlite'),
+      filename: path.join(__dirname, '../../../data/questionsAnswers.sqlite'),
     },
     useNullAsDefault: true,
   });
