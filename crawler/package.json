@@ -42,10 +42,10 @@
   },
   "homepage": "https://github.com/linonetwo/zhihu-nlp-playground#readme",
   "dependencies": {
-    "@types/node": "^13.1.2",
+    "@types/node": "^13.1.6",
     "@zeit/fetch-retry": "^4.1.0",
     "bluebird": "^3.7.2",
-    "knex": "^0.20.6",
+    "knex": "^0.20.7",
     "node-fetch": "^2.6.0",
     "sqlite3": "^4.1.1"
   },

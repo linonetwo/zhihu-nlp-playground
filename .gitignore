@@ -113,3 +113,4 @@ solid
 keys
 gun
 data/*.sqlite
+model/pretrained
