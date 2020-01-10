@@ -6,7 +6,7 @@ import { IAnswerData, IQuestionAnswersResponse } from './responses';
 
 import { getCurrentTime } from './utils';
 
-const fetch = fetchRetry(nodeFetch);
+const fetch: typeof nodeFetch = fetchRetry(nodeFetch);
 
 export interface ICrawlFailure {
   url: string;
@@ -32,7 +32,7 @@ export async function* getAnswersNewerThanTime(
       console.info(
         `Downloading https://www.zhihu.com/question/${questionID} offset=${currentOffset}&limit=${batchSize}`
       );
-      const result: IQuestionAnswersResponse = await fetch(ANSWER_INFO_URL).then((res: Response) => res.json());
+      const result: IQuestionAnswersResponse = await fetch(ANSWER_INFO_URL).then((res) => res.json());
       for (const answer of result.data) {
         const newerThanCrawledVersion = answer.updated_time > crawledTime;
         if (newerThanCrawledVersion) {

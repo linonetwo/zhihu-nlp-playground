@@ -38,7 +38,7 @@ import { getTransaction } from '../storage';
   Promise.all(
     questionIDs.map(async id => {
       const QUESTIONS_INFO_URL = `https://www.zhihu.com/api/v4/questions/${id}?include=data[*].answer_count,follower_count,content,detail`;
-      const result = await fetch(QUESTIONS_INFO_URL).then((res: Response) => res.json());
+      const result = await fetch(QUESTIONS_INFO_URL).then((res) => res.json());
       console.warn(`result`, JSON.stringify(result, null, '  '));
       try {
         const existedQuestion: { id: number; updatedTime: number; crawledTime: number } | undefined = await db(
