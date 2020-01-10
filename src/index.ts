@@ -4,14 +4,14 @@ function putFile(content: string, session: any) {}
 
 (async function main() {
   const session = await getSoLiDSession();
-  const publicFolder = session.webId.replace('profile/card#me', 'public')
+  const publicFolder = session.webId.replace('profile/card#me', 'public');
   console.log(`${publicFolder}/zhihu/aa.txt`);
-  
+
   await session.fetch(`${publicFolder}/zhihu/aa.txt`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'text' },
+    headers: { 'Content-Type': 'text', origin: session.webId, cookie: 'nssidp.sid=s%3AtDGDfwwArX4hSoa5L5tVh4YPV9hHjF4D.y%2FSka9fedhN7JGUnrZ8aKN9PzsfZH9gRzCe5fFdWOdw' },
     body: 'asdf',
-  })
+  });
 })();
 
 const QUESTIONS_INFO_URL =
