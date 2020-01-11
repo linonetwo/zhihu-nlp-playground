@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "run": "npm run build && MKCERT_PATH=\"$(mkcert -CAROOT)/rootCA.pem\" node ./dist/index.js",
-    "baas-start": "mkdir -p ./solid && cd ./solid && DEBUG=solid:*  solid start --root $(pwd)/data --config-file $(pwd)/../config.solid.example.json --extra-ca \"$(mkcert -CAROOT)/rootCA.pem\"",
+    "baas-start": "mkdir -p ./solid && cd ./solid && NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" solid start --root $(pwd)/data --config-file $(pwd)/../config.solid.example.json",
     "generate-keys": "mkdir -p ./keys && cd ./keys && mkcert localhost zhihucrawler.localhost 127.0.0.1",
     "type-check": "tsc --noEmit",
     "type-check:watch": "npm run type-check -- --watch",
