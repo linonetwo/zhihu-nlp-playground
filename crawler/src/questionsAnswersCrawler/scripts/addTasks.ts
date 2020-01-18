@@ -1,12 +1,15 @@
 import knex from 'knex';
 import path from 'path';
-import fetch from 'node-fetch';
+import nodeFetch from 'node-fetch';
+import fetchRetry from '@zeit/fetch-retry';
 
 import { getCurrentTime } from '../utils';
 import { getTransaction } from '../storage';
 
+const fetch: typeof nodeFetch = fetchRetry(nodeFetch);
+
 (async function() {
-  const { db } = await getTransaction();
+  const { trx, db } = await getTransaction();
 
   const questionIDs = [
     308798869,
@@ -35,13 +38,13 @@ import { getTransaction } from '../storage';
     311316650,
   ];
 
-  Promise.all(
+  await Promise.all(
     questionIDs.map(async id => {
       const QUESTIONS_INFO_URL = `https://www.zhihu.com/api/v4/questions/${id}?include=data[*].answer_count,follower_count,content,detail`;
-      const result = await fetch(QUESTIONS_INFO_URL).then((res) => res.json());
+      const result = await fetch(QUESTIONS_INFO_URL).then(res => res.json());
       console.warn(`result`, JSON.stringify(result, null, '  '));
       try {
-        const existedQuestion: { id: number; updatedTime: number; crawledTime: number } | undefined = await db(
+        const existedQuestion: { id: number; updatedTime: number; crawledTime: number } | undefined = await trx(
           'questions'
         )
           .where({
@@ -49,7 +52,7 @@ import { getTransaction } from '../storage';
           })
           .first('id', 'updatedTime', 'crawledTime');
         if (existedQuestion === undefined) {
-          await db('questions').insert({
+          await trx('questions').insert({
             id: result.id,
             title: result.title,
             // 这个是问题详情的更新时间，不是里面回答的更新时间
@@ -58,7 +61,7 @@ import { getTransaction } from '../storage';
             crawledTime: 0,
           });
         } else if (result.updated_time > existedQuestion.updatedTime) {
-          await db('questions')
+          await trx('questions')
             .where({
               id,
             })
@@ -71,7 +74,7 @@ import { getTransaction } from '../storage';
         console.error(error);
       }
     })
-  ).then(() => {
-    db.destroy();
-  });
+  );
+  await trx.commit();
+  await db.destroy();
 })();
