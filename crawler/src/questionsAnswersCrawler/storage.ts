@@ -70,6 +70,7 @@ export async function saveAnswerToDB(questionID: number, answer: IAnswerData, tr
       await trx('answers').insert({
         id: answerID,
         user: authorIDinDB,
+        question: questionID,
         content,
         createdTime,
         updatedTime,
