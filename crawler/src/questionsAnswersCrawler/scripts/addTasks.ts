@@ -2,10 +2,13 @@ import knex from 'knex';
 import path from 'path';
 import nodeFetch from 'node-fetch';
 import fetchRetry from '@zeit/fetch-retry';
+import ProxyAgent from 'proxy-agent';
 
 import { getCurrentTime } from '../utils';
 import { getTransaction } from '../storage';
 
+const proxy = 'socks5://127.0.0.1:1080';
+const agent = new ProxyAgent(proxy) as any;
 const fetch: typeof nodeFetch = fetchRetry(nodeFetch);
 
 (async function() {
@@ -44,7 +47,7 @@ const fetch: typeof nodeFetch = fetchRetry(nodeFetch);
   await Promise.all(
     questionIDs.map(async id => {
       const QUESTIONS_INFO_URL = `https://www.zhihu.com/api/v4/questions/${id}?include=data[*].answer_count,follower_count,content,detail`;
-      const result = await fetch(QUESTIONS_INFO_URL).then(res => res.json());
+      const result = await fetch(QUESTIONS_INFO_URL, { agent }).then(res => res.json());
       console.warn(`result`, JSON.stringify(result, null, '  '));
       try {
         const existedQuestion: { id: number; updatedTime: number; crawledTime: number } | undefined = await trx(
