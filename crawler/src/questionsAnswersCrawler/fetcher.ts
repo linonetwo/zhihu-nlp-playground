@@ -28,7 +28,7 @@ export async function* getAnswersNewerThanTime(
     const ANSWER_INFO_URL = `https://www.zhihu.com/api/v4/questions/${questionID}/answers?include=data[*].comment_count,content,voteup_count,created_time,updated_time,title,id,created,updated_time&offset=${currentOffset}&limit=${batchSize}&sort_by=updated`;
 
     try {
-      await Promise.delay(Math.random() * 1000);
+      await Promise.delay(Math.random() * 100);
       console.info(
         `Downloading https://www.zhihu.com/question/${questionID} offset=${currentOffset}&limit=${batchSize}`
       );
