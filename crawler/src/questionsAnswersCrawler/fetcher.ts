@@ -1,11 +1,14 @@
 import Promise from 'bluebird';
 import nodeFetch from 'node-fetch';
 import fetchRetry from '@zeit/fetch-retry';
+import ProxyAgent from 'proxy-agent';
 
 import { IAnswerData, IQuestionAnswersResponse } from './responses';
 
 import { getCurrentTime } from './utils';
 
+const proxy = 'socks5://127.0.0.1:1080';
+const agent = new ProxyAgent(proxy) as any;
 const fetch: typeof nodeFetch = fetchRetry(nodeFetch);
 
 export interface ICrawlFailure {
@@ -32,7 +35,7 @@ export async function* getAnswersNewerThanTime(
       console.info(
         `Downloading https://www.zhihu.com/question/${questionID} offset=${currentOffset}&limit=${batchSize}`
       );
-      const result: IQuestionAnswersResponse = await fetch(ANSWER_INFO_URL).then(res => res.json());
+      const result: IQuestionAnswersResponse = await fetch(ANSWER_INFO_URL, { agent }).then(res => res.json());
       if (!('data' in result)) {
         console.log(result);
         throw new Error(`${currentOffset}`);
