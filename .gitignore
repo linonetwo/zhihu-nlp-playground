@@ -113,6 +113,7 @@ solid
 keys
 gun
 data/*.sqlite
+data/*.sqlite-journal
 model/pretrained
 model/src/answerGenderExtractor/cache_dir
 model/src/answerGenderExtractor/outputs
