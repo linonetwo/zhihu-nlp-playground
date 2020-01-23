@@ -1,6 +1,7 @@
 export interface IQuestionAnswersResponse {
   data: IAnswerData[];
   paging: IPaging;
+  error: any;
 }
 
 export interface IAuthor {

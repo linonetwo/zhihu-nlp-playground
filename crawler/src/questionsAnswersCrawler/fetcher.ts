@@ -32,7 +32,11 @@ export async function* getAnswersNewerThanTime(
       console.info(
         `Downloading https://www.zhihu.com/question/${questionID} offset=${currentOffset}&limit=${batchSize}`
       );
-      const result: IQuestionAnswersResponse = await fetch(ANSWER_INFO_URL).then((res) => res.json());
+      const result: IQuestionAnswersResponse = await fetch(ANSWER_INFO_URL).then(res => res.json());
+      if (!('data' in result)) {
+        console.log(result);
+        throw new Error(`${currentOffset}`);
+      }
       for (const answer of result.data) {
         const newerThanCrawledVersion = answer.updated_time > crawledTime;
         if (newerThanCrawledVersion) {
