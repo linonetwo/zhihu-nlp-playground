@@ -4,9 +4,9 @@ import path from 'path';
 import { getTransaction } from '../storage';
 
 (async function() {
-  const { db } = await getTransaction();
+  const { db, trx } = await getTransaction();
 
-  db.schema
+  trx.schema
     .createTableIfNotExists('users', function(table) {
       table.increments('id');
       table.text('username').unique();
@@ -47,13 +47,14 @@ import { getTransaction } from '../storage';
       table.text('url');
     })
     .then(() =>
-      db('users').insert({
+    trx('users').insert({
         gender: 'unknown',
         headline: '',
         nickname: '匿名用户',
         username: '',
       })
     )
+    .then(() => trx.commit())
     .then(() => db.destroy())
     .catch(function(e) {
       console.error(e);
