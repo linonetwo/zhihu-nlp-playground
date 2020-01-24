@@ -113,3 +113,6 @@ solid
 keys
 data
 model/pretrained
+model/src/answerGenderExtractor/cache_dir
+model/src/answerGenderExtractor/outputs
+model/src/answerGenderExtractor/runs
